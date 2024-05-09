@@ -1,2 +1,47 @@
 ---
-# tasks file for kdump
+- name: Verify crashdump is installed
+  ansible.builtin.package:
+    name: "{{ kdump_package }}"
+    state: "{{ 'latest' if kdump_upgrade else 'present' }}"
+
+- name: Edit kdump config file
+  ansible.builtin.template:
+    src: kdump.conf
+    dest: "{{ kdump_conf_path }}"
+  notify:
+    - Restart kdump-tools service
+
+- name: Enable kdump-tools service
+  ansible.builtin.service:
+    name: kdump
+    state: started
+    enabled: true
+
+- name: Ensure kexec module loaded
+  ansible.builtin.lineinfile:
+    path: /etc/default/kexec
+    regexp: '^LOAD_KEXEC='
+    line: LOAD_KEXEC=true
+
+- name: Ensure the kdump is enabled
+  ansible.builtin.lineinfile:
+    path: /etc/default/kdump-tools
+    regexp: '^USE_KDUMP='
+    line: USE_KDUMP=1
+
+- name: Set a amount reserverd memory
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub.d/kdump-tools.cfg
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=.*\bcrashkernel=\S+\b.*$'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel={{ kdump_reserved_memory }}"'
+  when: "{{ kdump_reserved_memory }}" is defined
+
+- name: Update-grub
+  ansible.builtin.command:
+    cmd: /usr/sbin/update-grub
+
+- name: Reboot
+  ansible.builtin.reboot:
+  check_mode: yes
+  when: "{{ kdump_reboot_ok }}" is defined
+
