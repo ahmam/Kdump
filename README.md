@@ -5,7 +5,7 @@ An ansible role which configures kdump.
 
 Requirements
 ------------
-Ansible 2.4 or higher
+Ansible 2.12 or higher
 Ubuntu 22.04 LTS or equivalent 
 
 
