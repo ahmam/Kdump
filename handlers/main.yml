@@ -1,12 +1,6 @@
 ---
 - name: Restart kdump-tools service
   ansible.builtin.systemd:
-    name: kdump-tools-dump
-    state: restarted
-    enabled: yes
-
-- name: Restart kdump-tools service
-  ansible.builtin.systemd:
     name: kdump-tools
     state: restarted
     enabled: yes
