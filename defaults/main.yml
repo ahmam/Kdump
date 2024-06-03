@@ -2,4 +2,5 @@
 # defaults file for kdump
 kdump_crash_path: /var/crash
 kdump_reboot_ok: false
-
+kdump_conf_path: /etc/kdump
+kdump_upgrade: false
